@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rx Remedies - Employee View Medicines</title>
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+  >
+</head>
+<body class="bg-body-tertiary d-flex flex-column" style="min-height: 100vh;">
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg bg-white shadow-sm border-bottom">
+  <div class="container">
+    <span class="navbar-brand fw-bold text-success">Rx Remedies (Employee)</span>
+    <!-- Toggler button -->
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarTestView"
+      aria-controls="navbarTestView"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarTestView">
+      <div class="ms-auto d-flex">
+        <a href="{{ url_for('test_orders') }}" class="btn btn-outline-success me-2">
+          View Orders
+        </a>
+        <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+      </div>
+    </div>
+  </div>
+</nav>
+<!-- /Navbar -->
+
+<div class="container my-4 flex-grow-1">
+  <h5 class="text-success fw-bold mb-3">Medicines (Read-Only)</h5>
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>ID</th>
+          <th>Medicine Name</th>
+          <th>Price</th>
+          <th>Category</th>
+          <th>Quantity</th>
+          <th>Created At</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <!-- row layout: medicine_id, medicine_name, price, category_name, quantity, created_at -->
+          <td>{{ row[0] }}</td>
+          <td>{{ row[1] }}</td>
+          <td>${{ row[2] }}</td>
+          <td>{{ row[3] }}</td>
+          <td>{{ row[4] }}</td>
+          <td>{{ row[5] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<footer class="bg-white text-center py-3 border-top mt-auto">
+  <small class="text-muted">&copy; 2025 Rx Remedies</small>
+</footer>
+
+<script
+  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+</script>
+</body>
+</html>

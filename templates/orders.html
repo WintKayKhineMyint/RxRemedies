@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rx Remedies - Orders</title>
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+  >
+</head>
+<body class="bg-body-tertiary d-flex flex-column" style="min-height: 100vh;">
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg bg-white shadow-sm border-bottom">
+  <div class="container">
+    <a class="navbar-brand fw-bold text-success" href="#">Rx Remedies</a>
+    <!-- Toggler button -->
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarOrders"
+      aria-controls="navbarOrders"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarOrders">
+      <div class="ms-auto d-flex">
+        <a href="{{ url_for('index') }}" class="btn btn-outline-success me-2">Medicines</a>
+        <a href="{{ url_for('customers') }}" class="btn btn-outline-success me-2">Customers</a>
+        <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+      </div>
+    </div>
+  </div>
+</nav>
+<!-- /Navbar -->
+
+<div class="container my-4 flex-grow-1">
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <div class="alert alert-success">
+        {% for msg in messages %}
+          {{ msg }}<br>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <div class="row">
+    <!-- Create Order Form -->
+    <div class="col-md-4 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title text-success mb-3">Create Order</h5>
+          <form action="{{ url_for('create_order') }}" method="POST">
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Customer</label>
+              <select name="customer_id" class="form-select" required>
+                <option value="">-- Select Customer --</option>
+                {% for cust in customers %}
+                  <option value="{{ cust.id }}">{{ cust.full_name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Medicine</label>
+              <select name="medicine_id" class="form-select" required>
+                <option value="">-- Select Medicine --</option>
+                {% for med in medicines %}
+                  <option value="{{ med.id }}">{{ med.name }} (${{ med.price }})</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Quantity</label>
+              <input
+                type="number"
+                name="quantity"
+                class="form-control"
+                value="1"
+                min="1"
+                required
+              >
+            </div>
+            <button type="submit" class="btn btn-success w-100">Create Order</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Orders List -->
+    <div class="col-md-8">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title text-success mb-3">All Orders</h5>
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Medicine</th>
+                  <th>Qty</th>
+                  <th>Price</th>
+                  <th>Total Cost</th>
+                  <th>Order Time</th>
+                  <th style="width: 180px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for o in orders %}
+                <tr>
+                  <!-- row layout: order_id, customer_name, medicine_name, quantity, price, total_cost, order_time -->
+                  <td>{{ o[0] }}</td>
+                  <td>{{ o[1] }}</td>
+                  <td>{{ o[2] }}</td>
+                  <td>{{ o[3] }}</td>
+                  <td>${{ o[4] }}</td>
+                  <td>${{ o[5] }}</td>
+                  <td>{{ o[6] }}</td>
+                  <td>
+                    <!-- EDIT Button  -->
+                    <button
+                      type="button"
+                      class="btn btn-warning btn-sm me-1"
+                      data-bs-toggle="modal"
+                      data-bs-target="#editOrderModal-{{ o[0] }}"
+                    >
+                      Edit
+                    </button>
+                    <!-- DELETE Button -->
+                    <a
+                      href="{{ url_for('delete_order', order_id=o[0]) }}"
+                      class="btn btn-sm btn-danger"
+                      onclick="return confirm('Delete this order?');"
+                    >
+                      Delete
+                    </a>
+                  </td>
+                </tr>
+
+                <!-- Update Form -->
+                <div
+                  class="modal fade"
+                  id="editOrderModal-{{ o[0] }}"
+                  tabindex="-1"
+                  aria-hidden="true"
+                >
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <form
+                        action="{{ url_for('update_order', order_id=o[0]) }}"
+                        method="POST"
+                      >
+                        <div class="modal-header">
+                          <h5 class="modal-title">Update Order #{{ o[0] }}</h5>
+                          <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                          ></button>
+                        </div>
+                        <div class="modal-body">
+                          <div class="mb-3">
+                            <label class="form-label fw-semibold">Customer</label>
+                            <select name="customer_id" class="form-select" required>
+                              <option value="">-- Select Customer --</option>
+                              {% for cust in customers %}
+                                <option
+                                  value="{{ cust.id }}"
+                                  {% if cust.full_name == o[1] %} selected {% endif %}
+                                >
+                                  {{ cust.full_name }}
+                                </option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                          <div class="mb-3">
+                            <label class="form-label fw-semibold">Medicine</label>
+                            <select name="medicine_id" class="form-select" required>
+                              <option value="">-- Select Medicine --</option>
+                              {% for med in medicines %}
+                                <!-- If medicine name matches o[2], preselect -->
+                                <option
+                                  value="{{ med.id }}"
+                                  {% if med.name == o[2] %} selected {% endif %}
+                                >
+                                  {{ med.name }} (${{ med.price }})
+                                </option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                          <div class="mb-3">
+                            <label class="form-label fw-semibold">Quantity</label>
+                            <input
+                              type="number"
+                              class="form-control"
+                              name="quantity"
+                              value="{{ o[3] }}"
+                              min="1"
+                              required
+                            >
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal"
+                          >
+                            Cancel
+                          </button>
+                          <button type="submit" class="btn btn-success">Update</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="bg-white text-center py-3 border-top">
+  <small class="text-muted">&copy; 2025 Rx Remedies</small>
+</footer>
+
+<script
+  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+</script>
+</body>
+</html>
